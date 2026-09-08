@@ -2,6 +2,7 @@
   "name": "boyish",
   "version": "1.0.0",
   "description": "Boyish - a self-hosted media collection for pictures, videos, journal posts and links",
+  "license": "UNLICENSED",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"
