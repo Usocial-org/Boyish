@@ -20,6 +20,7 @@ Then open http://localhost:3000. Click the gear-like icon in the top right to si
 3. Render will use `render.yaml` to create the Boyish web service.
 4. Add the values for the environment variables marked `sync: false`:
   - `ADMIN_PASSWORD` — required only on the first start. It is hashed into `data/admin-auth.json`; change it later from the admin panel's Security tab.
+  - `ADMIN_PASSWORD_RESET` — optional one-time recovery flag. Set it to `true` together with a new `ADMIN_PASSWORD` if the admin password is forgotten, sign in once, then remove the flag and redeploy.
   - `PEXELS_API_KEY` — optional, enables the Pexels picture search tool.
   - `YOUTUBE_API_KEY` — optional, enables the YouTube video search tool.
 5. Deploy. Render gives you a URL for your Boyish site.

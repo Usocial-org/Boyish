@@ -41,6 +41,13 @@ function passwordMatches(password, stored) {
 }
 
 function loadAuth() {
+  const resetPassword = process.env.ADMIN_PASSWORD_RESET === 'true';
+  if (resetPassword && process.env.ADMIN_PASSWORD) {
+    const auth = hashPassword(process.env.ADMIN_PASSWORD);
+    fs.writeFileSync(AUTH_FILE, JSON.stringify(auth, null, 2), { mode: 0o600 });
+    console.warn('[Boyish] Admin password reset from ADMIN_PASSWORD. Remove ADMIN_PASSWORD_RESET after signing in.');
+    return auth;
+  }
   try {
     return JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
   } catch (error) {
