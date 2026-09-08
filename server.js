@@ -138,7 +138,13 @@ app.post('/api/admin/pictures', requireAdmin, (req, res) => {
     ? urls.map(url => String(url).trim()).filter(Boolean)
     : String(urls).split(/[\n,]/).map(u => u.trim()).filter(Boolean);
   const data = loadData();
-  const added = list.map(url => ({ id: id(), url, caption: caption || '', addedAt: Date.now() }));
+  const added = [{
+    id: id(),
+    url: list[0],
+    images: list,
+    caption: caption || '',
+    addedAt: Date.now()
+  }];
   data.pictures.unshift(...added);
   saveData(data);
   res.json({ added });
