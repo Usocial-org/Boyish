@@ -83,7 +83,7 @@ function renderDiscover(){
   const picturesGrid = $('#discoverPicturesGrid');
   const journalsGrid = $('#discoverJournalsGrid');
   videosGrid.innerHTML = videos.map(item => `<article class="discover-card discover-video" data-id="${escAttr(item.id)}"><div class="media-thumb">${videoMarkup(item, true)}</div><div class="discover-card-copy"><span>Video</span><strong>${esc(item.title || 'Untitled video')}</strong></div></article>`).join('');
-  picturesGrid.innerHTML = pictures.map(item => `<article class="discover-card discover-picture" data-id="${escAttr(item.id)}"><img src="${escAttr(item.url)}" alt="${escAttr(item.caption || '')}" loading="lazy"><div class="discover-card-copy"><span>Picture</span><strong>${esc(item.caption || 'Untitled picture')}</strong></div></article>`).join('');
+  picturesGrid.innerHTML = pictures.map(item => `<article class="discover-card discover-picture" data-id="${escAttr(item.id)}"><img src="${escAttr(firstPicture(item))}" alt="${escAttr(item.caption || '')}" loading="lazy"><div class="discover-card-copy"><span>Picture</span><strong>${esc(item.caption || 'Untitled picture')}</strong></div></article>`).join('');
   journalsGrid.innerHTML = journals.map(item => `<article class="discover-card journal-card discover-journal" data-id="${escAttr(item.id)}"><div class="discover-card-copy"><span>Journal</span><strong>${esc(item.title)}</strong><p>${esc((item.body || '').slice(0, 130))}</p></div></article>`).join('');
   $('#discoverVideosEmpty').classList.toggle('show', videos.length === 0);
   $('#discoverPicturesEmpty').classList.toggle('show', pictures.length === 0);
@@ -100,16 +100,46 @@ function renderPictures(){
   const pics = state.content.pictures;
   grid.innerHTML = pics.map(p => `
     <article class="pic-card" data-id="${escAttr(p.id)}">
-      <img src="${escAttr(p.url)}" alt="${escAttr(p.caption)}" loading="lazy">
+      ${pictureCardMarkup(p)}
       ${p.caption ? `<div class="cap">${esc(p.caption)}</div>` : ''}
     </article>`).join('');
   $('#picturesEmpty').classList.toggle('show', pics.length === 0);
   grid.querySelectorAll('.pic-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
+    card.addEventListener('click', event=>{
+      if (event.target.closest('.picture-next, .picture-prev')) return;
       const p = pics.find(x=>x.id === card.dataset.id);
       openDetail('picture', p.id);
     });
+    card.querySelector('.picture-next')?.addEventListener('click', event => changePictureCard(event, 1));
+    card.querySelector('.picture-prev')?.addEventListener('click', event => changePictureCard(event, -1));
   });
+}
+
+function pictureCardMarkup(picture){
+  const urls = pictureUrls(picture);
+  const controls = urls.length > 1
+    ? `<div class="picture-controls"><button class="picture-prev" type="button" aria-label="Previous image">&#8592;</button><span class="picture-position">1 / ${urls.length}</span><button class="picture-next" type="button" aria-label="Next image">&#8594;</button></div>`
+    : '';
+  return `<div class="picture-carousel" data-index="0" data-urls="${escAttr(JSON.stringify(urls))}"><img src="${escAttr(urls[0] || '')}" alt="${escAttr(picture.caption)}" loading="lazy">${controls}</div>`;
+}
+
+function changePictureCard(event, direction){
+  const carousel = event.currentTarget.closest('.picture-carousel');
+  const urls = JSON.parse(carousel.dataset.urls || '[]');
+  if (urls.length < 2) return;
+  const nextIndex = (Number(carousel.dataset.index) + direction + urls.length) % urls.length;
+  carousel.dataset.index = String(nextIndex);
+  const image = carousel.querySelector('img');
+  image.src = urls[nextIndex];
+  carousel.querySelector('.picture-position').textContent = `${nextIndex + 1} / ${urls.length}`;
+}
+
+function pictureUrls(picture){
+  return Array.isArray(picture.images) && picture.images.length ? picture.images : [picture.url];
+}
+
+function firstPicture(picture){
+  return pictureUrls(picture)[0] || '';
 }
 
 function renderVideos(){
@@ -189,7 +219,7 @@ function renderDetail(type, id){
   if (!item) return;
   const detailContent = $('#detailContent');
   if (type === 'picture') {
-    detailContent.innerHTML = `<p class="eyebrow">Picture</p><h1>${esc(item.caption || 'Untitled picture')}</h1>${interactionBar(type, id)}<figure class="detail-media detail-picture"><img src="${escAttr(item.url)}" alt="${escAttr(item.caption || '')}"></figure>`;
+    detailContent.innerHTML = `<p class="eyebrow">Picture collection</p><h1>${esc(item.caption || 'Untitled picture')}</h1>${interactionBar(type, id)}<div class="detail-gallery picture-gallery">${pictureUrls(item).map(url => `<img src="${escAttr(url)}" alt="${escAttr(item.caption || '')}" loading="lazy">`).join('')}</div>`;
   } else if (type === 'video') {
     detailContent.innerHTML = `<div class="watch-layout"><div class="watch-main"><p class="eyebrow">Video</p><div class="detail-media detail-video">${videoMarkup(item)}</div><h1>${esc(item.title || 'Untitled video')}</h1>${interactionBar(type, id)}</div>${recommendationMarkup(id)}</div>`;
   } else {
