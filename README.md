@@ -15,15 +15,14 @@ Then open http://localhost:3000. Click the gear-like icon in the top right to si
 
 ## Deploying on Render
 
-1. Push this folder to a GitHub repo.
-2. On Render: **New → Web Service**, connect the repo.
-3. Build command: `npm install`
-4. Start command: `npm start`
-5. Add environment variables (Render dashboard → Environment):
+1. Push this folder, including `render.yaml`, to a GitHub repo.
+2. In Render, choose **New → Blueprint** and select the repository.
+3. Render will use `render.yaml` to create the Boyish web service.
+4. Add the values for the environment variables marked `sync: false`:
   - `ADMIN_PASSWORD` — required only on the first start. It is hashed into `data/admin-auth.json`; change it later from the admin panel's Security tab.
-   - `PEXELS_API_KEY` — optional, enables the "Fetch pictures" AI tool (free key at pexels.com/api).
-   - `YOUTUBE_API_KEY` — optional, enables the "Fetch videos" AI tool (free key via Google Cloud Console, enable "YouTube Data API v3").
-6. Deploy. Render gives you a URL for your Boyish site.
+  - `PEXELS_API_KEY` — optional, enables the Pexels picture search tool.
+  - `YOUTUBE_API_KEY` — optional, enables the YouTube video search tool.
+5. Deploy. Render gives you a URL for your Boyish site.
 
 ## How content storage works
 
